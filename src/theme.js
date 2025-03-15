@@ -3,27 +3,26 @@ import { createTheme } from '@mui/material/styles';
 
 const theme = createTheme({
   palette: {
-    mode: 'light',
+    mode: 'dark',
     primary: {
-      main: '#b71c1c', // Vermelho forte
+      main: '#b71c1c', // vermelho forte
     },
     secondary: {
-      main: '#424242', // Cinza escuro
+      main: '#424242', // cinza escuro
     },
     background: {
-      default: '#f5f5f5', // Fundo claro
-      paper: '#ffffff',   // Cartões brancos
+      default: '#121212', // fundo preto
+      paper: '#1e1e1e',   // papel/carta cinza escuro
     },
     text: {
-      primary: '#212121', // Preto/cinza escuro
-      secondary: '#757575',
+      primary: '#ffffff',
+      secondary: '#cccccc',
     },
   },
   typography: {
     fontFamily: 'Roboto, sans-serif',
   },
   components: {
-    // Barra de topo com gradiente leve
     MuiAppBar: {
       styleOverrides: {
         root: {
@@ -31,11 +30,10 @@ const theme = createTheme({
         },
       },
     },
-    // Drawer para sidebar escura
     MuiDrawer: {
       styleOverrides: {
         paper: {
-          backgroundColor: '#1e1e2f', // Sidebar escura
+          backgroundColor: '#1c1c1c',
           color: '#fff',
         },
       },
@@ -43,7 +41,8 @@ const theme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: 8,
+          borderRadius: 12,
+          boxShadow: '0 4px 20px rgba(255, 23, 68, 0.5)',
         },
       },
     },
