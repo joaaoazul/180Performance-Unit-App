@@ -1,6 +1,7 @@
 // src/components/ProtectedData.js
 import React, { useEffect, useState } from 'react';
-import { fetchProtectedData } from '../../services/authService';
+import { fetchProtectedData } from '../services/authService';
+import { Box, Typography } from '@mui/material';
 
 function ProtectedData() {
   const [data, setData] = useState(null);
@@ -22,14 +23,14 @@ function ProtectedData() {
     getData();
   }, []);
 
-  if (loading) return <p>Carregando dados protegidos...</p>;
-  if (error) return <p style={{ color: 'red' }}>Erro: {error}</p>;
+  if (loading) return <Typography>Carregando dados protegidos...</Typography>;
+  if (error) return <Typography color="error">Erro: {error}</Typography>;
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h3>Dados Protegidos:</h3>
+    <Box sx={{ p: 2 }}>
+      <Typography variant="h6">Dados Protegidos:</Typography>
       <pre>{JSON.stringify(data, null, 2)}</pre>
-    </div>
+    </Box>
   );
 }
 

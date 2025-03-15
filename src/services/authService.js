@@ -24,13 +24,13 @@ export const login = async (email, password) => {
     }
   };
   
-  // Função para obter o token
-  export const getToken = () => {
+// Função para obter o token
+export const getToken = () => {
     return localStorage.getItem('token');
-  };
+};
   
-  // Função para buscar dados protegidos no backend
-  export const fetchProtectedData = async () => {
+// Função para buscar dados protegidos no backend
+export const fetchProtectedData = async () => {
     const token = getToken();
     if (!token) {
       throw new Error('Token não encontrado! Faça login novamente.');
@@ -45,10 +45,16 @@ export const login = async (email, password) => {
         },
       });
   
-      const data = await response.json();
+      const contentType = response.headers.get("content-type");
+      let data;
+      if (contentType && contentType.includes("application/json")) {
+        data = await response.json();
+      } else {
+        throw new Error("Received non-JSON response");
+      }
   
       if (!response.ok) {
-        throw new Error(data.message || 'Não autorizado');
+        throw new Error(data.message || 'Não autorizado: ' + response.statusText);
       }
   
       return data;
@@ -56,10 +62,8 @@ export const login = async (email, password) => {
       console.error('Erro ao buscar dados protegidos:', error);
       throw new Error(error.message || 'Erro desconhecido');
     }
-  };
+};
 
-  export const logout = () => {
+export const logout = () => {
     localStorage.removeItem('token');
-  };
-  
-  
+};

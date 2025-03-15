@@ -1,7 +1,7 @@
 // src/components/Authentication.js
 import React, { useState, useContext } from 'react';
 import { login } from '../../services/authService';
-import { AuthContext } from '../../context/AuthContext';
+import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 function Authentication() {
