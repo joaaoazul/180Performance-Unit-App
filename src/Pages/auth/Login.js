@@ -253,29 +253,37 @@ const Login = () => {
   const navigate = useNavigate();
   const { loginUser } = useContext(AuthContext);
   
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setIsLoading(true);
+ // src/pages/auth/Login.js - Parte modificada do handleSubmit
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError('');
+  setIsLoading(true);
+  
+  try {
+    // Usar seu método de login existente
+    const response = await login(email, password);
     
-    try {
-      // Usar seu método de login existente
-      const response = await login(email, password);
-      
-      // Usar seu context para autenticação
-      loginUser(response.token, { 
-        name: response.name || 'Personal Trainer', 
-        email 
-      });
-      
-      // Redirecionar para o dashboard
-      navigate('/dashboard');
-    } catch (err) {
-      setError(err.message || 'Falha na autenticação. Verifique suas credenciais.');
-    } finally {
-      setIsLoading(false);
+    // Verificar se existe resposta e token antes de prosseguir
+    if (!response || !response.token) {
+      throw new Error('Resposta inválida do servidor');
     }
-  };
+    
+    // Usar seu context para autenticação com validação de dados
+    loginUser(response.token, { 
+      name: response.name || response.user?.name || 'Personal Trainer', 
+      email: response.email || response.user?.email || email 
+    });
+    
+    // Redirecionar para o dashboard
+    navigate('/dashboard');
+  } catch (err) {
+    console.error('Erro durante login:', err);
+    setError(err.message || 'Falha na autenticação. Verifique suas credenciais.');
+  } finally {
+    setIsLoading(false);
+  }
+};
   
   return (
     <PageContainer>

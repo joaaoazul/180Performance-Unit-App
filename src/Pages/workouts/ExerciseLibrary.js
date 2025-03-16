@@ -4,8 +4,9 @@ import styled from 'styled-components';
 import { 
   FiPlus, FiSearch, FiFilter, FiChevronLeft, FiRefreshCw,
   FiVideo, FiImage, FiInfo, FiCopy, FiX, FiCheck,
-  FiEye, FiEdit2, FiTrash2, FiMoreVertical
+  FiEye, FiEdit2, FiTrash2, FiMoreVertical, 
 } from 'react-icons/fi';
+import { GiWeightLiftingUp, GiDumbbell } from 'react-icons/gi';
 import MainLayout from '../../components/Layout/MainLayout';
 import { fetchProtectedData } from '../../services/authService';
 // import api from '../../services/api';
@@ -998,7 +999,7 @@ const ExerciseLibrary = () => {
       ) : filteredExercises.length === 0 ? (
         <EmptyState>
           <EmptyIcon>
-            <FiDumbbell />
+            
           </EmptyIcon>
           <EmptyTitle>No exercises found</EmptyTitle>
           <EmptyDescription>

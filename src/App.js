@@ -1,6 +1,6 @@
 // src/App.js
 import React, { useState, useEffect, useContext } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, AuthContext } from './components/context/AuthContext';
 import './styles/styles.css';
 
@@ -20,6 +20,7 @@ import AddAthlete from './Pages/athletes/AddAthlete';
 import EditAthlete from './Pages/athletes/EditAthlete';
 
 // Treinos
+import WorkoutSession from './Pages/workouts/WorkoutSession';
 import WorkoutsList from './Pages/workouts/WorkoutsList';
 import WorkoutDetail from './Pages/workouts/WorkoutDetail';
 import CreateWorkout from './Pages/workouts/CreateWorkout';
@@ -71,7 +72,11 @@ const LoadingPlaceholder = () => (
 
 // Rota protegida que verifica autenticação
 const ProtectedRoute = ({ children }) => {
-  const { token } = useContext(AuthContext);
+  const { token, loading } = useContext(AuthContext);
+  
+  if (loading) {
+    return <LoadingPlaceholder />;
+  }
   
   if (!token) {
     return <Navigate to="/login" />;
@@ -82,18 +87,19 @@ const ProtectedRoute = ({ children }) => {
 
 // AppRoutes - Componente para as rotas, que precisa ter acesso ao contexto
 const AppRoutes = () => {
-  const [loading, setLoading] = useState(true);
+  const { loading: authLoading } = useContext(AuthContext);
+  const [appLoading, setAppLoading] = useState(true);
   
   useEffect(() => {
     // Simular carregamento inicial de recursos
     const timer = setTimeout(() => {
-      setLoading(false);
+      setAppLoading(false);
     }, 1000);
     
     return () => clearTimeout(timer);
   }, []);
   
-  if (loading) {
+  if (authLoading || appLoading) {
     return <LoadingPlaceholder />;
   }
   
@@ -134,32 +140,38 @@ const AppRoutes = () => {
         </ProtectedRoute>
       } />
       
+      
       {/* Treinos */}
-      <Route path="/workouts" element={
-        <ProtectedRoute>
-          <WorkoutsList />
-        </ProtectedRoute>
-      } />
-      <Route path="/workouts/:id" element={
-        <ProtectedRoute>
-          <WorkoutDetail />
-        </ProtectedRoute>
-      } />
-      <Route path="/workouts/create" element={
-        <ProtectedRoute>
-          <CreateWorkout />
-        </ProtectedRoute>
-      } />
-      <Route path="/workouts/:id/edit" element={
-        <ProtectedRoute>
-          <EditWorkout />
-        </ProtectedRoute>
-      } />
-      <Route path="/workouts/exercises" element={
-        <ProtectedRoute>
-          <ExerciseLibrary />
-        </ProtectedRoute>
-      } />
+<Route path="/workouts" element={
+  <ProtectedRoute>
+    <WorkoutsList />
+  </ProtectedRoute>
+} />
+<Route path="/workouts/create" element={
+  <ProtectedRoute>
+    <CreateWorkout />
+  </ProtectedRoute>
+} />
+<Route path="/workouts/exercises" element={
+  <ProtectedRoute>
+    <ExerciseLibrary />
+  </ProtectedRoute>
+} />
+<Route path="/workouts/:id/start" element={
+  <ProtectedRoute>
+    <WorkoutSession />
+  </ProtectedRoute>
+} />
+<Route path="/workouts/:id/edit" element={
+  <ProtectedRoute>
+    <EditWorkout />
+  </ProtectedRoute>
+} />
+<Route path="/workouts/:id" element={
+  <ProtectedRoute>
+    <WorkoutDetail />
+  </ProtectedRoute>
+} />
       
       {/* Nutrição */}
       <Route path="/nutrition" element={
