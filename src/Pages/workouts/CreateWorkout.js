@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { 
-  FiChevronLeft, FiActivity, FiSave, FiPlus, FiTrash2, 
-  FiMove, FiRefreshCw, FiX, FiInfo, FiList, FiDumbbell
-} from 'react-icons/fi';
+    FiChevronLeft, FiActivity, FiSave, FiPlus, FiTrash2, 
+    FiMove, FiRefreshCw, FiX, FiInfo, FiSearch, FiList
+  } from 'react-icons/fi';
+  import ExerciseSelector from '../../components/exercises/ExerciseSelector';
 import MainLayout from '../../components/Layout/MainLayout';
 import { fetchProtectedData } from '../../services/authService';
 // import api from '../../services/api';
@@ -30,6 +31,23 @@ const BackButton = styled(Link)`
     color: #10B981;
   }
 `;
+const SelectExerciseButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #F1F5F9;
+  color: #64748B;
+  border: 1px solid #E2E8F0;
+  font-size: 14px;
+  cursor: pointer;
+  
+  &:hover {
+    background: #E2E8F0;
+  }
+`;
+
 
 const PageTitle = styled.h1`
   font-size: 24px;
@@ -364,29 +382,57 @@ const LoadingIcon = styled(FiRefreshCw)`
 
 // Componente principal
 const CreateWorkout = () => {
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [formErrors, setFormErrors] = useState({});
-  
-  // Estado do formulário
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    type: '',
-    difficulty: '',
-    duration: '',
-    targetMuscles: '',
-    notes: '',
-    exercises: [
-      {
-        name: '',
+    const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
+    const [formErrors, setFormErrors] = useState({});
+    const [selectorOpen, setSelectorOpen] = useState(false);
+    
+    // Estado do formulário
+    const [formData, setFormData] = useState({
+      title: '',
+      description: '',
+      type: '',
+      difficulty: '',
+      duration: '',
+      targetMuscles: '',
+      notes: '',
+      exercises: [
+        {
+          name: '',
+          sets: '',
+          reps: '',
+          rest: '',
+          notes: ''
+        }
+      ]
+    });
+    
+    // Manipulador para adicionar exercícios selecionados
+    const handleSelectExercises = (selectedExercises) => {
+      // Mapear os exercícios selecionados para o formato do formData.exercises
+      const newExercises = selectedExercises.map(exercise => ({
+        id: exercise.id,  // Mantemos o ID para referência
+        name: exercise.name,
         sets: '',
         reps: '',
         rest: '',
         notes: ''
+      }));
+      
+      // Adicionar apenas exercícios que não estão já incluídos (verificando por ID)
+      const existingIds = formData.exercises
+        .filter(ex => ex.id)  // Filtra apenas exercícios que já têm ID
+        .map(ex => ex.id);
+      
+      const uniqueNewExercises = newExercises.filter(ex => !existingIds.includes(ex.id));
+      
+      if (uniqueNewExercises.length > 0) {
+        setFormData({
+          ...formData,
+          exercises: [...formData.exercises, ...uniqueNewExercises]
+        });
       }
-    ]
-  });
+    };
   
   // Verificar autenticação
   useEffect(() => {
@@ -715,12 +761,17 @@ const CreateWorkout = () => {
                 </SectionTitle>
                 
                 <ExerciseContainer>
-                  <ExerciseHeader>
-                    <ExerciseTitle>Exercise List</ExerciseTitle>
-                    <AddExerciseButton type="button" onClick={handleAddExercise}>
-                      <FiPlus size={14} /> Add Exercise
-                    </AddExerciseButton>
-                  </ExerciseHeader>
+                <ExerciseHeader>
+  <ExerciseTitle>Exercise List</ExerciseTitle>
+  <div style={{ display: 'flex', gap: '10px' }}>
+    <SelectExerciseButton type="button" onClick={() => setSelectorOpen(true)}>
+      <FiSearch size={14} /> Browse Exercises
+    </SelectExerciseButton>
+    <AddExerciseButton type="button" onClick={handleAddExercise}>
+      <FiPlus size={14} /> Add Exercise
+    </AddExerciseButton>
+  </div>
+</ExerciseHeader>
                   
                   <ExerciseList>
                     {formData.exercises.map((exercise, index) => (
@@ -862,6 +913,12 @@ const CreateWorkout = () => {
           </FormContainer>
         </form>
       )}
+        <ExerciseSelector 
+    isOpen={selectorOpen}
+    onClose={() => setSelectorOpen(false)}
+    onSelectExercises={handleSelectExercises}
+    selectedExerciseIds={formData.exercises.filter(ex => ex.id).map(ex => ex.id)}
+  />
     </MainLayout>
   );
 };

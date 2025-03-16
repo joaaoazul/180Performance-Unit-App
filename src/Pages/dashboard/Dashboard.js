@@ -252,7 +252,7 @@ const Dashboard = () => {
         ],
         motivation: {
           quote: "Não conte os dias, faça com que os dias contem. Transforme cada sessão em uma oportunidade para alcançar a grandeza.",
-          author: "Motivação FitPro"
+          author: "180PUnit"
         },
         performanceData: [
           { name: 'Jan', attendance: 90, performance: 85, satisfaction: 88 },
@@ -299,8 +299,8 @@ const Dashboard = () => {
       
       <WelcomeSection>
         <WelcomeInfo>
-          <WelcomeTitle>Bem-vindo, {user?.name?.split(' ')[0] || 'Trainer'}! 💪</WelcomeTitle>
-          <WelcomeSubtitle>Acompanhe seus atletas e atividades do dia</WelcomeSubtitle>
+          <WelcomeTitle>Bem-vindo, {user?.name?.split(' ')[0] || 'Rúben'}! 💪</WelcomeTitle>
+          <WelcomeSubtitle>Acompanha os teus atletas e o seu dia-a-dia</WelcomeSubtitle>
         </WelcomeInfo>
         
         <RefreshButton onClick={handleRefresh}>
