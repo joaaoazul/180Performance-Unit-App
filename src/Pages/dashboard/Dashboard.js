@@ -15,19 +15,37 @@ import WorkoutDistributionCard from '../../components/Dashboard/WorkoutDistribut
 import { AuthContext } from '../../components/context/AuthContext';
 import { fetchProtectedData } from '../../services/authService';
 
+const DashboardContainer = styled.div`
+  max-width: 1400px;
+  margin: 0 auto;
+  animation: fadeIn 0.3s ease;
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+`;
+
 const GridContainer = styled.div`
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 20px;
-  margin-bottom: 20px;
-  animation: fadeIn 0.3s ease forwards;
+  margin-bottom: 24px;
   
   @media (max-width: 1200px) {
     grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
   }
   
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
+    gap: 12px;
   }
 `;
 
@@ -35,10 +53,10 @@ const TwoColumnGrid = styled.div`
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 20px;
-  animation: fadeIn 0.3s ease forwards;
   
   @media (max-width: 1200px) {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
 `;
 
@@ -46,82 +64,142 @@ const ChartsRow = styled.div`
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 20px;
-  margin-top: 20px;
-  animation: fadeIn 0.4s ease forwards;
+  margin-top: 24px;
   
   @media (max-width: 1200px) {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
 `;
 
 const WelcomeSection = styled.div`
-  margin-bottom: 30px;
+  margin-bottom: 32px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
 `;
 
-const WelcomeInfo = styled.div`
-  animation: fadeIn 0.2s ease forwards;
-`;
+const WelcomeInfo = styled.div``;
 
-const WelcomeTitle = styled.h2`
-  font-size: 28px;
+const WelcomeTitle = styled.h1`
+  font-size: 32px;
   font-weight: 700;
   color: #1E293B;
-  margin: 0 0 5px;
+  margin: 0 0 8px;
+  line-height: 1.2;
+  
+  @media (max-width: 768px) {
+    font-size: 26px;
+  }
 `;
 
 const WelcomeSubtitle = styled.p`
   font-size: 16px;
   color: #64748B;
   margin: 0;
+  font-weight: 400;
 `;
 
 const RefreshButton = styled.button`
   display: flex;
   align-items: center;
-  background: #F8FAFC;
+  gap: 8px;
+  background: white;
   border: 1px solid #E2E8F0;
   color: #64748B;
-  padding: 8px 16px;
-  border-radius: 8px;
+  padding: 10px 20px;
+  border-radius: 12px;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
   
-  svg {
-    margin-right: 8px;
+  &:hover {
+    background: #F8FAFC;
+    border-color: #CBD5E1;
+    color: #1E293B;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
   }
   
+  &:active {
+    transform: translateY(0);
+  }
+  
+  svg {
+    font-size: 16px;
+    transition: transform 0.3s ease;
+  }
+  
+  &:hover svg {
+    transform: rotate(180deg);
+  }
+`;
+
+const InsightSection = styled.div`
+  background: white;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+  
   &:hover {
-    background: #F1F5F9;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+  
+  h3 {
+    margin: 0 0 12px;
+    font-size: 18px;
+    font-weight: 600;
     color: #1E293B;
+  }
+  
+  p {
+    color: #64748B;
+    margin-bottom: 20px;
+    line-height: 1.6;
+    font-size: 14px;
   }
 `;
 
 const ActionButton = styled.a`
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
+  gap: 8px;
   background: #10B981;
   color: white;
-  padding: 8px 16px;
-  border-radius: 8px;
+  padding: 10px 20px;
+  border-radius: 10px;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  margin-top: 20px;
   text-decoration: none;
   
-  svg {
-    margin-left: 8px;
+  &:hover {
+    background: #059669;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
   }
   
-  &:hover {
-    background: #0D9668;
+  &:active {
+    transform: translateY(0);
+  }
+  
+  svg {
+    font-size: 16px;
+    transition: transform 0.2s ease;
+  }
+  
+  &:hover svg {
+    transform: translateX(2px);
   }
 `;
 
@@ -131,22 +209,39 @@ const LoadingOverlay = styled.div`
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(248, 250, 252, 0.9);
+  backdrop-filter: blur(4px);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
 `;
 
-const LoadingSpinner = styled(FiRefreshCw)`
-  color: #10B981;
-  font-size: 40px;
-  animation: spin 1s linear infinite;
+const LoadingContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+`;
+
+const LoadingSpinner = styled.div`
+  width: 48px;
+  height: 48px;
+  border: 3px solid #E2E8F0;
+  border-top-color: #10B981;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
   
   @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
   }
+`;
+
+const LoadingText = styled.p`
+  color: #64748B;
+  font-size: 14px;
+  font-weight: 500;
 `;
 
 const Dashboard = () => {
@@ -164,6 +259,9 @@ const Dashboard = () => {
       // Por enquanto, usamos o fetchProtectedData apenas para validar
       // a autenticação com o backend
       await fetchProtectedData();
+      
+      // Simular delay para ver o loading
+      await new Promise(resolve => setTimeout(resolve, 800));
       
       // Dados mockados para demonstração
       setDashboardData({
@@ -188,7 +286,7 @@ const Dashboard = () => {
           },
           {
             title: 'Receita Mensal',
-            value: 'R$ 3.850',
+            value: '€3.850',
             trend: 'vs último mês',
             percentChange: 5.1,
             icon: FiDollarSign,
@@ -201,8 +299,8 @@ const Dashboard = () => {
             trend: 'vs último mês',
             percentChange: 1.5,
             icon: FiActivity,
-            color: '#EF4444',
-            bgColor: '#FEF2F2'
+            color: '#8B5CF6',
+            bgColor: '#F3E8FF'
           }
         ],
         athletes: [
@@ -252,7 +350,7 @@ const Dashboard = () => {
         ],
         motivation: {
           quote: "Não conte os dias, faça com que os dias contem. Transforme cada sessão em uma oportunidade para alcançar a grandeza.",
-          author: "180PUnit"
+          author: "Performance Unit"
         },
         performanceData: [
           { name: 'Jan', attendance: 90, performance: 85, satisfaction: 88 },
@@ -263,11 +361,11 @@ const Dashboard = () => {
           { name: 'Jun', attendance: 97, performance: 95, satisfaction: 94 }
         ],
         workoutDistribution: [
-          { name: 'Força', value: 40 },
-          { name: 'HIIT', value: 25 },
-          { name: 'Funcional', value: 20 },
-          { name: 'Cardio', value: 10 },
-          { name: 'Mobilidade', value: 5 }
+          { name: 'Força', value: 40, color: '#10B981' },
+          { name: 'HIIT', value: 25, color: '#3B82F6' },
+          { name: 'Funcional', value: 20, color: '#F59E0B' },
+          { name: 'Cardio', value: 10, color: '#8B5CF6' },
+          { name: 'Mobilidade', value: 5, color: '#EF4444' }
         ]
       });
       
@@ -293,66 +391,70 @@ const Dashboard = () => {
     <MainLayout title="Dashboard">
       {isLoading && (
         <LoadingOverlay>
-          <LoadingSpinner />
+          <LoadingContainer>
+            <LoadingSpinner />
+            <LoadingText>A carregar o dashboard...</LoadingText>
+          </LoadingContainer>
         </LoadingOverlay>
       )}
       
-      <WelcomeSection>
-        <WelcomeInfo>
-          <WelcomeTitle>Bem-vindo, {user?.name?.split(' ')[0] || 'Rúben'}! 💪</WelcomeTitle>
-          <WelcomeSubtitle>Acompanha os teus atletas e o seu dia-a-dia</WelcomeSubtitle>
-        </WelcomeInfo>
+      <DashboardContainer>
+        <WelcomeSection>
+          <WelcomeInfo>
+            <WelcomeTitle>Bem-vindo, {user?.name?.split(' ')[0] || 'Treinador'}! 💪</WelcomeTitle>
+            <WelcomeSubtitle>Acompanha os teus atletas e o seu progresso diário</WelcomeSubtitle>
+          </WelcomeInfo>
+          
+          <RefreshButton onClick={handleRefresh}>
+            <FiRefreshCw /> Atualizar dados
+          </RefreshButton>
+        </WelcomeSection>
         
-        <RefreshButton onClick={handleRefresh}>
-          <FiRefreshCw /> Atualizar dados
-        </RefreshButton>
-      </WelcomeSection>
-      
-      {dashboardData && (
-        <>
-          <GridContainer>
-            {dashboardData.stats.map((stat, index) => (
-              <StatCard
-                key={index}
-                title={stat.title}
-                value={stat.value}
-                trend={stat.trend}
-                percentChange={stat.percentChange}
-                icon={stat.icon}
-                color={stat.color}
-                bgColor={stat.bgColor}
-              />
-            ))}
-          </GridContainer>
-          
-          <MotivationCard 
-            quote={dashboardData.motivation.quote}
-            author={dashboardData.motivation.author}
-          />
-          
-          <TwoColumnGrid style={{ marginTop: '20px' }}>
-            <AthleteProgressCard athletes={dashboardData.athletes} />
-            <UpcomingSessionsCard sessions={dashboardData.sessions} />
-          </TwoColumnGrid>
-          
-          <PerformanceChart data={dashboardData.performanceData} />
-          
-          <ChartsRow>
-            <div>
-              <h3 style={{ margin: '20px 0', fontSize: '18px', fontWeight: '600', color: '#1E293B' }}>
-                Metas Concluídas
-              </h3>
-              <p style={{ color: '#64748B', marginBottom: '20px' }}>
-                Seus atletas estão tendo um bom desempenho! A média de conclusão de metas está em 75%, acima da média do setor que é 68%.
-              </p>
-              <ActionButton href="/athletes">
-                Ver relatório completo <FiChevronRight />
-              </ActionButton>
-            </div>
-            <WorkoutDistributionCard data={dashboardData.workoutDistribution} />
-          </ChartsRow>
-        </>
-      )}
+        {dashboardData && (
+          <>
+            <GridContainer>
+              {dashboardData.stats.map((stat, index) => (
+                <StatCard
+                  key={index}
+                  title={stat.title}
+                  value={stat.value}
+                  trend={stat.trend}
+                  percentChange={stat.percentChange}
+                  icon={stat.icon}
+                  color={stat.color}
+                  bgColor={stat.bgColor}
+                />
+              ))}
+            </GridContainer>
+            
+            <MotivationCard 
+              quote={dashboardData.motivation.quote}
+              author={dashboardData.motivation.author}
+            />
+            
+            <TwoColumnGrid style={{ marginTop: '24px' }}>
+              <AthleteProgressCard athletes={dashboardData.athletes} />
+              <UpcomingSessionsCard sessions={dashboardData.sessions} />
+            </TwoColumnGrid>
+            
+            <PerformanceChart data={dashboardData.performanceData} />
+            
+            <ChartsRow>
+              <InsightSection>
+                <h3>Metas Concluídas</h3>
+                <p>
+                  Os teus atletas estão com um excelente desempenho! A média de conclusão de metas está em 75%, 
+                  superando a média do setor que é 68%. Continua o excelente trabalho!
+                </p>
+                <ActionButton href="/athletes">
+                  Ver relatório completo <FiChevronRight />
+                </ActionButton>
+              </InsightSection>
+              <WorkoutDistributionCard data={dashboardData.workoutDistribution} />
+            </ChartsRow>
+          </>
+        )}
+      </DashboardContainer>
     </MainLayout>
   );
 };

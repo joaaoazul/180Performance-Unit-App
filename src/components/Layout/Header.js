@@ -1,11 +1,11 @@
-// src/components/Layout/Header.js - Header Moderno para Personal Trainer
-import React, { useState, useContext } from 'react';
+// src/components/Layout/Header.js - Header Responsivo Corrigido
+import React, { useState, useContext, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { 
   FiSearch, FiBell, FiChevronDown, FiSettings, 
   FiUser, FiLogOut, FiMessageCircle, FiCalendar,
-  FiPlus, FiRefreshCw
+  FiPlus, FiMenu
 } from 'react-icons/fi';
 import { AuthContext } from '../context/AuthContext';
 import { useTenant } from '../context/TenantContext';
@@ -13,7 +13,7 @@ import { useTenant } from '../context/TenantContext';
 const HeaderContainer = styled.header`
   position: fixed;
   top: 0;
-  left: 260px;
+  left: ${props => props.sidebarCollapsed ? '80px' : '260px'};
   right: 0;
   height: 70px;
   background: rgba(255, 255, 255, 0.95);
@@ -25,12 +25,26 @@ const HeaderContainer = styled.header`
   padding: 0 24px;
   z-index: 50;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  @media (max-width: 768px) {
+    left: 0;
+    padding: 0 16px 0 72px; /* Espaço para o botão do menu mobile */
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0 12px 0 68px;
+  }
 `;
 
 const LeftSection = styled.div`
   display: flex;
   align-items: center;
   gap: 20px;
+  
+  @media (max-width: 480px) {
+    gap: 12px;
+  }
 `;
 
 const PageInfo = styled.div``;
@@ -41,17 +55,29 @@ const PageTitle = styled.h1`
   color: #1E293B;
   margin: 0;
   line-height: 1;
+  
+  @media (max-width: 480px) {
+    font-size: 18px;
+  }
 `;
 
 const PageSubtitle = styled.p`
   font-size: 14px;
   color: #64748B;
   margin: 2px 0 0 0;
+  
+  @media (max-width: 768px) {
+    display: none;
+  }
 `;
 
 const QuickActions = styled.div`
   display: flex;
   gap: 8px;
+  
+  @media (max-width: 640px) {
+    display: none;
+  }
 `;
 
 const QuickActionBtn = styled.button`
@@ -83,12 +109,20 @@ const RightSection = styled.div`
   display: flex;
   align-items: center;
   gap: 16px;
+  
+  @media (max-width: 480px) {
+    gap: 8px;
+  }
 `;
 
 const SearchContainer = styled.div`
   position: relative;
   display: flex;
   align-items: center;
+  
+  @media (max-width: 1024px) {
+    display: none;
+  }
 `;
 
 const SearchInput = styled.input`
@@ -117,6 +151,34 @@ const SearchIcon = styled(FiSearch)`
   left: 14px;
   color: #94A3B8;
   font-size: 16px;
+`;
+
+const MobileSearchButton = styled.button`
+  display: none;
+  width: 40px;
+  height: 40px;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  @media (max-width: 1024px) {
+    display: flex;
+  }
+  
+  &:hover {
+    background: white;
+    border-color: #CBD5E1;
+    transform: translateY(-1px);
+  }
+  
+  svg {
+    color: #64748B;
+    font-size: 18px;
+  }
 `;
 
 const NotificationContainer = styled.div`
@@ -167,8 +229,6 @@ const NotificationBadge = styled.span`
 
 const UserContainer = styled.div`
   position: relative;
-  display: flex;
-  align-items: center;
 `;
 
 const UserButton = styled.button`
@@ -181,6 +241,10 @@ const UserButton = styled.button`
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
+  
+  @media (max-width: 640px) {
+    padding: 6px;
+  }
   
   &:hover {
     border-color: #CBD5E1;
@@ -205,6 +269,10 @@ const UserAvatar = styled.div`
 
 const UserInfo = styled.div`
   text-align: left;
+  
+  @media (max-width: 640px) {
+    display: none;
+  }
 `;
 
 const UserName = styled.div`
@@ -225,6 +293,10 @@ const ChevronIcon = styled(FiChevronDown)`
   font-size: 16px;
   transition: transform 0.2s ease;
   transform: ${props => props.isOpen ? 'rotate(180deg)' : 'rotate(0deg)'};
+  
+  @media (max-width: 640px) {
+    display: none;
+  }
 `;
 
 const UserDropdown = styled.div`
@@ -239,6 +311,11 @@ const UserDropdown = styled.div`
   padding: 8px;
   z-index: 100;
   display: ${props => props.isOpen ? 'block' : 'none'};
+  
+  @media (max-width: 480px) {
+    width: 200px;
+    right: -10px;
+  }
 `;
 
 const DropdownItem = styled.button`
@@ -281,6 +358,32 @@ const Header = () => {
   const { user, logoutUser } = useContext(AuthContext);
   const { tenant } = useTenant();
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // Listen for sidebar state changes
+  useEffect(() => {
+    const handleSidebarToggle = (event) => {
+      setSidebarCollapsed(event.detail.collapsed);
+    };
+
+    window.addEventListener('sidebarToggle', handleSidebarToggle);
+    
+    return () => {
+      window.removeEventListener('sidebarToggle', handleSidebarToggle);
+    };
+  }, []);
+
+  // Click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isUserDropdownOpen && !event.target.closest('.user-dropdown-container')) {
+        setIsUserDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [isUserDropdownOpen]);
 
   // Determinar título da página baseado na rota
   const getPageInfo = () => {
@@ -347,7 +450,7 @@ const Header = () => {
   };
 
   return (
-    <HeaderContainer>
+    <HeaderContainer sidebarCollapsed={sidebarCollapsed}>
       <LeftSection>
         <PageInfo>
           <PageTitle>{pageInfo.title}</PageTitle>
@@ -366,6 +469,10 @@ const Header = () => {
             placeholder="Pesquisar atletas, treinos, sessões..."
           />
         </SearchContainer>
+        
+        <MobileSearchButton>
+          <FiSearch />
+        </MobileSearchButton>
 
         <NotificationContainer>
           <NotificationBtn>
@@ -374,7 +481,7 @@ const Header = () => {
           </NotificationBtn>
         </NotificationContainer>
 
-        <UserContainer>
+        <UserContainer className="user-dropdown-container">
           <UserButton 
             onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
           >
