@@ -1,120 +1,143 @@
-// src/services/authService.js - Versão com XMLHttpRequest em vez de fetch
+// src/services/authService.js - VERSÃO TEMPORÁRIA para testar frontend
 
-// Função de login usando XMLHttpRequest em vez de fetch
+const API_BASE_URL = process.env.NODE_ENV === 'development' 
+  ? 'http://localhost:5000/api'
+  : '/api';
+
+// Função temporária que simula sucesso
+export const fetchProtectedData = async (endpoint = '', options = {}) => {
+  console.log(`[MOCK] fetchProtectedData called with: ${endpoint}`);
+  
+  // Se for verificação de auth, simular sucesso
+  if (endpoint === '/auth/verify' || endpoint === '') {
+    return {
+      success: true,
+      user: {
+        id: 1,
+        name: 'João Silva',
+        email: 'joao@demo.com',
+        role: 'trainer'
+      }
+    };
+  }
+  
+  // Para outras endpoints, simular dados
+  return {
+    success: true,
+    data: []
+  };
+};
+
+// Função login temporária
 export const login = async (email, password) => {
-  return new Promise((resolve, reject) => {
-    try {
-      // Cria uma nova requisição XMLHttpRequest
-      const xhr = new XMLHttpRequest();
-      
-      // Configura a requisição
-      xhr.open('POST', 'http://localhost:3000/auth/login', true);
-      xhr.setRequestHeader('Content-Type', 'application/json');
-      
-      // Define o handler para quando a requisição for completada
-      xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4) {
-          console.log('Status da resposta:', xhr.status);
-          console.log('Tipo de conteúdo:', xhr.getResponseHeader('Content-Type'));
-          console.log('Resposta bruta:', xhr.responseText);
-          
-          if (xhr.status >= 200 && xhr.status < 300) {
-            // Sucesso - tenta fazer o parse do JSON
-            try {
-              const data = JSON.parse(xhr.responseText);
-              
-              // Guarda o token no localStorage
-              if (data.token) {
-                localStorage.setItem('token', data.token);
-              }
-              
-              resolve(data);
-            } catch (jsonError) {
-              console.error('Erro ao fazer parse do JSON:', jsonError);
-              console.error('Texto da resposta:', xhr.responseText);
-              reject(new Error('A resposta do servidor não é JSON válido'));
-            }
-          } else {
-            // Erro na requisição
-            try {
-              // Tenta fazer parse do erro como JSON
-              const errorData = JSON.parse(xhr.responseText);
-              reject(new Error(errorData.message || `Erro ${xhr.status}`));
-            } catch (e) {
-              // Se não for JSON, usa o texto bruto
-              reject(new Error(`Erro ${xhr.status}: ${xhr.responseText || xhr.statusText}`));
-            }
-          }
-        }
-      };
-      
-      // Define handler para erros de rede
-      xhr.onerror = function() {
-        console.error('Erro de rede na requisição');
-        reject(new Error('Não foi possível conectar ao servidor. Verifique sua conexão.'));
-      };
-      
-      // Envia a requisição
-      xhr.send(JSON.stringify({ email, password }));
-      
-    } catch (error) {
-      console.error('Erro ao criar a requisição:', error);
-      reject(error);
-    }
-  });
+  console.log(`[MOCK] Login attempt: ${email}`);
+  
+  // Simular delay de rede
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  
+  // Simular login bem-sucedido sempre
+  const mockUser = {
+    id: 1,
+    name: 'João Silva',
+    email: email,
+    role: 'trainer'
+  };
+  
+  const mockToken = 'mock-jwt-token-' + Date.now();
+  
+  // Guardar no localStorage
+  localStorage.setItem('authToken', mockToken);
+  localStorage.setItem('token', mockToken);
+  localStorage.setItem('user', JSON.stringify(mockUser));
+  
+  return {
+    success: true,
+    user: mockUser,
+    token: mockToken
+  };
 };
 
-// Função para obter o token
-export const getToken = () => {
-  return localStorage.getItem('token');
+// Função register temporária
+export const register = async (userData) => {
+  console.log(`[MOCK] Register attempt:`, userData);
+  
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  
+  const mockUser = {
+    id: 1,
+    name: userData.name || 'Novo Utilizador',
+    email: userData.email,
+    role: 'trainer'
+  };
+  
+  const mockToken = 'mock-jwt-token-' + Date.now();
+  
+  localStorage.setItem('authToken', mockToken);
+  localStorage.setItem('token', mockToken);
+  localStorage.setItem('user', JSON.stringify(mockUser));
+  
+  return {
+    success: true,
+    user: mockUser,
+    token: mockToken
+  };
 };
 
-// Função para buscar dados protegidos no backend (usando XMLHttpRequest)
-export const fetchProtectedData = async () => {
-  return new Promise((resolve, reject) => {
-    const token = getToken();
-    if (!token) {
-      reject(new Error('Token não encontrado! Faça login novamente.'));
-      return;
-    }
-    
-    try {
-      const xhr = new XMLHttpRequest();
-      xhr.open('GET', 'http://localhost:3000/auth/me', true);
-      xhr.setRequestHeader('Content-Type', 'application/json');
-      xhr.setRequestHeader('Authorization', `Bearer ${token}`);
-      
-      xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4) {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            try {
-              const data = JSON.parse(xhr.responseText);
-              resolve(data);
-            } catch (e) {
-              reject(new Error('Resposta inválida do servidor'));
-            }
-          } else {
-            try {
-              const errorData = JSON.parse(xhr.responseText);
-              reject(new Error(errorData.message || `Erro ${xhr.status}`));
-            } catch (e) {
-              reject(new Error(`Erro ${xhr.status}: ${xhr.statusText}`));
-            }
-          }
-        }
-      };
-      
-      xhr.onerror = function() {
-        reject(new Error('Erro de conexão ao servidor'));
-      };
-      
-      xhr.send();
-    } catch (error) {
-      reject(error);
-    }
-  });
-};
-
+// Função logout
 export const logout = () => {
+  localStorage.removeItem('authToken');
   localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  console.log('[MOCK] User logged out');
 };
+
+// Função para verificar se está autenticado
+export const isAuthenticated = () => {
+  const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+  return !!token;
+};
+
+// Função para obter usuário atual
+export const getCurrentUser = () => {
+  try {
+    const user = localStorage.getItem('user');
+    return user ? JSON.parse(user) : null;
+  } catch (error) {
+    console.error('Failed to parse user data:', error);
+    return null;
+  }
+};
+
+// Função para obter token
+export const getToken = () => {
+  return localStorage.getItem('authToken') || localStorage.getItem('token');
+};
+
+// Forgot password temporário
+export const forgotPassword = async (email) => {
+  console.log(`[MOCK] Forgot password for: ${email}`);
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  return { success: true };
+};
+
+// Reset password temporário
+export const resetPassword = async (token, newPassword) => {
+  console.log(`[MOCK] Reset password with token: ${token}`);
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  return { success: true };
+};
+
+// Export default também para manter compatibilidade
+const authService = {
+  login,
+  register,
+  logout,
+  isAuthenticated,
+  getCurrentUser,
+  getToken,
+  forgotPassword,
+  resetPassword,
+  fetchProtectedData
+};
+
+export default authService;

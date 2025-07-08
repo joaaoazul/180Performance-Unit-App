@@ -1,4 +1,4 @@
-// src/components/layout/Sidebar.js
+// src/components/Layout/Sidebar.js - VOLTANDO AO ORIGINAL
 import React, { useContext } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';

@@ -1,0 +1,15 @@
+/* src/styles/tenant-variables.css - MÍNIMO para não quebrar nada */
+
+/* Apenas variáveis básicas, SEM estilos que quebrem o layout */
+:root {
+  --primary-color: #10B981;
+  --secondary-color: #059669;
+}
+
+/* Só a animação de loading */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ZERO estilos globais que possam quebrar o teu design */

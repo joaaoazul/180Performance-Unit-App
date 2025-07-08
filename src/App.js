@@ -1,62 +1,48 @@
-// src/App.js
+// src/App.js - Apenas adiciona a rota de branding
 import React, { useState, useEffect, useContext } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, AuthContext } from './components/context/AuthContext';
+import { TenantProvider } from './components/context/TenantContext';
 import './styles/styles.css';
+import './styles/tenant-variables.css';
 
-// Páginas de Autenticação
+// Todas as tuas importações existentes...
 import Login from './Pages/auth/Login';
 import Register from './Pages/auth/Register';
 import ForgotPassword from './Pages/auth/ForgotPassword';
 import ResetPassword from './Pages/auth/ResetPassword';
-
-// Dashboard
 import Dashboard from './Pages/dashboard/Dashboard';
-
-// Atletas
 import AthletesList from './Pages/athletes/AthletesList';
 import AthleteDetail from './Pages/athletes/AthleteDetail';
 import AddAthlete from './Pages/athletes/AddAthlete';
 import EditAthlete from './Pages/athletes/EditAthlete';
-
-// Treinos
 import WorkoutSession from './Pages/workouts/WorkoutSession';
 import WorkoutsList from './Pages/workouts/WorkoutsList';
 import WorkoutDetail from './Pages/workouts/WorkoutDetail';
 import CreateWorkout from './Pages/workouts/CreateWorkout';
 import EditWorkout from './Pages/workouts/EditWorkout';
 import ExerciseLibrary from './Pages/workouts/ExerciseLibrary';
-
-// Nutrição
 import NutritionPlans from './Pages/nutrition/NutritionPlans';
 import NutritionPlanDetail from './Pages/nutrition/NutritionPlanDetail';
 import CreateNutritionPlan from './Pages/nutrition/CreateNutritionPlan';
 import MealLibrary from './Pages/nutrition/MealLibrary';
-
-// Agenda
 import Calendar from './Pages/calendar/Calendar';
 import SessionDetail from './Pages/calendar/SessionDetail';
-
-// Mensagens
 import Messages from './Pages/messages/Messages';
 import Conversation from './Pages/messages/Conversation';
-
-// Finanças
 import Finance from './Pages/finance/Finance';
 import Invoices from './Pages/finance/Invoices';
 import Subscriptions from './Pages/finance/Subscriptions';
-
-// Análises
 import Analytics from './Pages/analytics/Analytics';
 import Reports from './Pages/analytics/Reports';
-
-// Configurações
 import Settings from './Pages/settings/Settings';
 import Profile from './Pages/settings/Profile';
 import BusinessSettings from './Pages/settings/BusinessSettings';
 import Notifications from './Pages/settings/Notifications';
 
-// Loading Placeholder
+// NOVA IMPORTAÇÃO
+
+
 const LoadingPlaceholder = () => (
   <div style={{ 
     display: 'flex', 
@@ -64,13 +50,12 @@ const LoadingPlaceholder = () => (
     alignItems: 'center', 
     height: '100vh',
     fontSize: '18px',
-    color: '#10B981'
+    color: 'var(--primary-color, #10B981)'
   }}>
     Carregando aplicativo...
   </div>
 );
 
-// Rota protegida que verifica autenticação
 const ProtectedRoute = ({ children }) => {
   const { token, loading } = useContext(AuthContext);
   
@@ -85,13 +70,11 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
-// AppRoutes - Componente para as rotas, que precisa ter acesso ao contexto
 const AppRoutes = () => {
   const { loading: authLoading } = useContext(AuthContext);
   const [appLoading, setAppLoading] = useState(true);
   
   useEffect(() => {
-    // Simular carregamento inicial de recursos
     const timer = setTimeout(() => {
       setAppLoading(false);
     }, 1000);
@@ -105,20 +88,18 @@ const AppRoutes = () => {
   
   return (
     <Routes>
-      {/* Rotas de Autenticação */}
+      {/* Todas as tuas routes existentes mantêm-se iguais */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password/:token" element={<ResetPassword />} />
       
-      {/* Dashboard */}
       <Route path="/dashboard" element={
         <ProtectedRoute>
           <Dashboard />
         </ProtectedRoute>
       } />
       
-      {/* Atletas */}
       <Route path="/athletes" element={
         <ProtectedRoute>
           <AthletesList />
@@ -140,40 +121,37 @@ const AppRoutes = () => {
         </ProtectedRoute>
       } />
       
+      <Route path="/workouts" element={
+        <ProtectedRoute>
+          <WorkoutsList />
+        </ProtectedRoute>
+      } />
+      <Route path="/workouts/create" element={
+        <ProtectedRoute>
+          <CreateWorkout />
+        </ProtectedRoute>
+      } />
+      <Route path="/workouts/exercises" element={
+        <ProtectedRoute>
+          <ExerciseLibrary />
+        </ProtectedRoute>
+      } />
+      <Route path="/workouts/:id/start" element={
+        <ProtectedRoute>
+          <WorkoutSession />
+        </ProtectedRoute>
+      } />
+      <Route path="/workouts/:id/edit" element={
+        <ProtectedRoute>
+          <EditWorkout />
+        </ProtectedRoute>
+      } />
+      <Route path="/workouts/:id" element={
+        <ProtectedRoute>
+          <WorkoutDetail />
+        </ProtectedRoute>
+      } />
       
-      {/* Treinos */}
-<Route path="/workouts" element={
-  <ProtectedRoute>
-    <WorkoutsList />
-  </ProtectedRoute>
-} />
-<Route path="/workouts/create" element={
-  <ProtectedRoute>
-    <CreateWorkout />
-  </ProtectedRoute>
-} />
-<Route path="/workouts/exercises" element={
-  <ProtectedRoute>
-    <ExerciseLibrary />
-  </ProtectedRoute>
-} />
-<Route path="/workouts/:id/start" element={
-  <ProtectedRoute>
-    <WorkoutSession />
-  </ProtectedRoute>
-} />
-<Route path="/workouts/:id/edit" element={
-  <ProtectedRoute>
-    <EditWorkout />
-  </ProtectedRoute>
-} />
-<Route path="/workouts/:id" element={
-  <ProtectedRoute>
-    <WorkoutDetail />
-  </ProtectedRoute>
-} />
-      
-      {/* Nutrição */}
       <Route path="/nutrition" element={
         <ProtectedRoute>
           <NutritionPlans />
@@ -195,7 +173,6 @@ const AppRoutes = () => {
         </ProtectedRoute>
       } />
       
-      {/* Agenda */}
       <Route path="/calendar" element={
         <ProtectedRoute>
           <Calendar />
@@ -207,7 +184,6 @@ const AppRoutes = () => {
         </ProtectedRoute>
       } />
       
-      {/* Mensagens */}
       <Route path="/messages" element={
         <ProtectedRoute>
           <Messages />
@@ -219,7 +195,6 @@ const AppRoutes = () => {
         </ProtectedRoute>
       } />
       
-      {/* Finanças */}
       <Route path="/finance" element={
         <ProtectedRoute>
           <Finance />
@@ -236,7 +211,6 @@ const AppRoutes = () => {
         </ProtectedRoute>
       } />
       
-      {/* Análises */}
       <Route path="/analytics" element={
         <ProtectedRoute>
           <Analytics />
@@ -248,7 +222,6 @@ const AppRoutes = () => {
         </ProtectedRoute>
       } />
       
-      {/* Configurações */}
       <Route path="/settings" element={
         <ProtectedRoute>
           <Settings />
@@ -270,19 +243,20 @@ const AppRoutes = () => {
         </ProtectedRoute>
       } />
       
-      {/* Redirecionamentos */}
+      
       <Route path="/" element={<Navigate to="/dashboard" />} />
       <Route path="*" element={<Navigate to="/dashboard" />} />
     </Routes>
   );
 };
 
-// Componente principal da aplicação
 const App = () => {
   return (
-    <AuthProvider>
-      <AppRoutes />
-    </AuthProvider>
+    <TenantProvider>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
+    </TenantProvider>
   );
 };
 

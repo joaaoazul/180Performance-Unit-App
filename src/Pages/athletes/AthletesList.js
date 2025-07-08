@@ -1,4 +1,4 @@
-// src/pages/athletes/AthletesList.js
+// src/Pages/athletes/AthletesList.js - VOLTANDO AO ORIGINAL
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
@@ -10,7 +10,7 @@ import {
 import MainLayout from '../../components/Layout/MainLayout';
 import { fetchProtectedData } from '../../services/authService';
 
-// Componentes estilizados
+// Componentes estilizados - ORIGINAL
 const PageHeader = styled.div`
   display: flex;
   justify-content: space-between;
@@ -43,6 +43,7 @@ const Button = styled.button`
   border: 1px solid ${props => props.secondary ? '#E2E8F0' : 'transparent'};
   background: ${props => props.secondary ? 'white' : '#10B981'};
   color: ${props => props.secondary ? '#64748B' : 'white'};
+  text-decoration: none;
   
   &:hover {
     background: ${props => props.secondary ? '#F8FAFC' : '#0D9668'};
@@ -234,6 +235,7 @@ const ActionItem = styled.button`
   border: none;
   cursor: pointer;
   color: ${props => props.danger ? '#EF4444' : '#1E293B'};
+  text-decoration: none;
   
   &:hover {
     background: ${props => props.danger ? '#FEF2F2' : '#F8FAFC'};
@@ -336,10 +338,9 @@ const AthletesList = () => {
         setLoading(true);
         
         // Verificar autenticação
-        await fetchProtectedData();
+        await fetchProtectedData('/auth/verify');
         
-        // Aqui você pode fazer a chamada para sua API para buscar atletas
-        // Por enquanto, vamos usar dados mockados
+        // Dados mockados por agora
         setTimeout(() => {
           const mockAthletes = [
             {
