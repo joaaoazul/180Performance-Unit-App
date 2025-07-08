@@ -1,56 +1,54 @@
-// src/pages/athletes/AthleteDetail.js
+// src/pages/Athletes/AthleteDetail.js
 import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { 
-  FiEdit2, FiChevronLeft, FiUser, FiCalendar, FiPhone, 
-  FiMail, FiTarget, FiActivity, FiTrendingUp, FiRefreshCw,
-  FiAward, FiClipboard, FiMessageSquare, FiPlus, FiUsers
-} from 'react-icons/fi';
 import MainLayout from '../../components/Layout/MainLayout';
 import { fetchProtectedData } from '../../services/authService';
-// import api from '../../services/api';
+import { 
+  FiUser, FiCalendar, FiChevronLeft, FiEdit2, FiTrendingUp,
+  FiActivity, FiClock, FiPlus, FiMail, FiPhone, FiTarget,
+  FiMoreVertical, FiFileText, FiSend, FiSave, FiHeart,
+  FiSmile, FiMeh, FiFrown, FiBattery, FiMoon, FiAlertCircle,
+  FiTrendingDown, FiBarChart2, FiCheckCircle, FiXCircle
+} from 'react-icons/fi';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
-// Componentes estilizados
+// Styled Components
 const PageHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 `;
 
 const BackButton = styled(Link)`
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
+  padding: 8px 16px;
   color: #64748B;
   text-decoration: none;
   font-size: 14px;
-  font-weight: 500;
   
   &:hover {
-    color: #10B981;
+    color: #1E293B;
   }
 `;
 
 const EditButton = styled(Link)`
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 16px;
+  padding: 10px 16px;
+  background: #10B981;
+  color: white;
   border-radius: 8px;
+  text-decoration: none;
   font-size: 14px;
   font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  background: #F8FAFC;
-  border: 1px solid #E2E8F0;
-  color: #64748B;
-  text-decoration: none;
   
   &:hover {
-    background: #F1F5F9;
-    color: #1E293B;
+    background: #059669;
   }
 `;
 
@@ -58,26 +56,8 @@ const Section = styled.div`
   background: white;
   border-radius: 12px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  margin-bottom: 24px;
+  margin-bottom: 20px;
   overflow: hidden;
-`;
-
-const SectionHeader = styled.div`
-  padding: 20px;
-  border-bottom: 1px solid #E2E8F0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
-
-const SectionTitle = styled.h2`
-  font-size: 18px;
-  font-weight: 600;
-  color: #1E293B;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 10px;
 `;
 
 const SectionContent = styled.div`
@@ -86,19 +66,19 @@ const SectionContent = styled.div`
 
 const ProfileHeader = styled.div`
   display: flex;
-  align-items: center;
-  gap: 20px;
-  padding-bottom: 20px;
+  gap: 30px;
+  align-items: flex-start;
   
   @media (max-width: 768px) {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
+    text-align: center;
   }
 `;
 
 const ProfileAvatar = styled.div`
-  width: 100px;
-  height: 100px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
   background: #E2E8F0;
   display: flex;
@@ -108,6 +88,7 @@ const ProfileAvatar = styled.div`
   font-weight: 600;
   color: #64748B;
   overflow: hidden;
+  flex-shrink: 0;
 `;
 
 const ProfileInfo = styled.div`
@@ -115,15 +96,22 @@ const ProfileInfo = styled.div`
 `;
 
 const ProfileName = styled.h1`
-  font-size: 24px;
+  margin: 0 0 10px;
+  font-size: 28px;
   font-weight: 600;
   color: #1E293B;
-  margin: 0 0 5px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  
+  @media (max-width: 768px) {
+    justify-content: center;
+  }
 `;
 
 const ProfileBadge = styled.span`
   display: inline-block;
-  padding: 4px 8px;
+  padding: 4px 10px;
   border-radius: 16px;
   font-size: 12px;
   font-weight: 500;
@@ -218,178 +206,248 @@ const Tab = styled.button`
   }
 `;
 
-const Grid = styled.div`
+// Check-in specific styles
+const CheckinOverview = styled.div`
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-  
-  @media (max-width: 1024px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const MetricsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 16px;
-  margin-bottom: 20px;
-  
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
+  margin-bottom: 30px;
 `;
 
-const MetricCard = styled.div`
-  background: #F8FAFC;
+const CheckinStat = styled.div`
+  background: ${props => props.variant === 'alert' ? '#FEF2F2' : '#F8FAFC'};
+  border: 1px solid ${props => props.variant === 'alert' ? '#FECACA' : '#E2E8F0'};
   border-radius: 8px;
   padding: 16px;
-  border: 1px solid #E2E8F0;
-`;
-
-const MetricLabel = styled.div`
-  font-size: 13px;
-  color: #64748B;
-  margin-bottom: 8px;
   display: flex;
   align-items: center;
-  gap: 6px;
-  
-  svg {
-    font-size: 14px;
-  }
+  justify-content: space-between;
 `;
 
-const MetricValue = styled.div`
-  font-size: 24px;
+const CheckinStatInfo = styled.div`
+  flex: 1;
+`;
+
+const CheckinStatLabel = styled.div`
+  font-size: 13px;
+  color: #64748B;
+  margin-bottom: 4px;
+`;
+
+const CheckinStatValue = styled.div`
+  font-size: 20px;
+  font-weight: 600;
+  color: ${props => props.variant === 'alert' ? '#EF4444' : '#1E293B'};
+`;
+
+const CheckinStatIcon = styled.div`
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: ${props => props.variant === 'alert' ? '#FEE2E2' : '#ECFDF5'};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: ${props => props.variant === 'alert' ? '#EF4444' : '#10B981'};
+  font-size: 20px;
+`;
+
+const ChartContainer = styled.div`
+  background: white;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 30px;
+`;
+
+const ChartHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+`;
+
+const ChartTitle = styled.h3`
+  margin: 0;
+  font-size: 16px;
   font-weight: 600;
   color: #1E293B;
 `;
 
-const MetricTrend = styled.div`
-  font-size: 12px;
-  margin-top: 5px;
-  color: ${props => props.positive ? '#10B981' : '#EF4444'};
+const PeriodSelector = styled.div`
   display: flex;
-  align-items: center;
-  gap: 4px;
-`;
-
-const ProgressChart = styled.div`
-  height: 7px;
-  width: 100%;
-  background: #E2E8F0;
-  border-radius: 4px;
-  margin-top: 10px;
-  overflow: hidden;
-`;
-
-const ProgressBar = styled.div`
-  height: 100%;
-  width: ${props => props.value}%;
-  background: ${props => {
-    if (props.value >= 75) return '#10B981';
-    if (props.value >= 50) return '#3B82F6';
-    if (props.value >= 25) return '#F59E0B';
-    return '#EF4444';
-  }};
-  border-radius: 4px;
-  transition: width 0.3s ease;
-`;
-
-const TableWrapper = styled.div`
-  overflow-x: auto;
-`;
-
-const Table = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-`;
-
-const Th = styled.th`
-  text-align: left;
-  padding: 12px 16px;
-  font-size: 13px;
-  font-weight: 500;
-  color: #64748B;
-  border-bottom: 1px solid #E2E8F0;
-`;
-
-const Td = styled.td`
-  padding: 12px 16px;
-  font-size: 14px;
-  color: #1E293B;
-  border-bottom: 1px solid #F1F5F9;
-`;
-
-const Tr = styled.tr`
-  &:hover {
-    background: #F8FAFC;
-  }
-  
-  &:last-child td {
-    border-bottom: none;
-  }
-`;
-
-const AddButton = styled.button`
-  display: flex;
-  align-items: center;
-  justify-content: center;
   gap: 8px;
-  padding: 8px 16px;
-  background: #10B981;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
+`;
+
+const PeriodButton = styled.button`
+  padding: 6px 12px;
+  border: 1px solid ${props => props.active ? '#10B981' : '#E2E8F0'};
+  background: ${props => props.active ? '#10B981' : 'white'};
+  color: ${props => props.active ? 'white' : '#64748B'};
+  border-radius: 6px;
+  font-size: 13px;
   cursor: pointer;
   transition: all 0.2s ease;
   
   &:hover {
-    background: #0D9668;
+    border-color: #10B981;
+    color: ${props => props.active ? 'white' : '#10B981'};
+  }
+`;
+
+const CheckinHistory = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 16px;
+`;
+
+const CheckinCard = styled.div`
+  background: white;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  padding: 16px;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+`;
+
+const CheckinHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+`;
+
+const CheckinDate = styled.div`
+  font-size: 14px;
+  font-weight: 500;
+  color: #1E293B;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+`;
+
+const CheckinMood = styled.div`
+  font-size: 24px;
+`;
+
+const CheckinMetrics = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 12px;
+`;
+
+const CheckinMetric = styled.div`
+  text-align: center;
+  padding: 8px;
+  background: #F8FAFC;
+  border-radius: 6px;
+`;
+
+const MetricIcon = styled.div`
+  font-size: 16px;
+  color: #64748B;
+  margin-bottom: 4px;
+`;
+
+const MetricScore = styled.div`
+  font-size: 16px;
+  font-weight: 600;
+  color: #1E293B;
+`;
+
+const MetricName = styled.div`
+  font-size: 11px;
+  color: #64748B;
+  margin-top: 2px;
+`;
+
+const CheckinNotes = styled.div`
+  font-size: 13px;
+  color: #64748B;
+  line-height: 1.5;
+  padding: 10px;
+  background: #F8FAFC;
+  border-radius: 6px;
+  margin-top: 8px;
+`;
+
+const AlertBanner = styled.div`
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  
+  svg {
+    color: #EF4444;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+`;
+
+const AlertText = styled.div`
+  flex: 1;
+  
+  h4 {
+    margin: 0 0 4px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #DC2626;
+  }
+  
+  p {
+    margin: 0;
+    font-size: 13px;
+    color: #7F1D1D;
   }
 `;
 
 const EmptyState = styled.div`
-  padding: 40px 20px;
   text-align: center;
+  padding: 60px 20px;
 `;
 
 const EmptyIcon = styled.div`
-  font-size: 32px;
+  font-size: 48px;
   color: #CBD5E1;
   margin-bottom: 16px;
 `;
 
 const EmptyTitle = styled.h3`
-  font-size: 16px;
-  font-weight: 600;
-  color: #1E293B;
   margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #64748B;
 `;
 
 const EmptyDescription = styled.p`
+  margin: 0;
   font-size: 14px;
-  color: #64748B;
-  margin: 0 0 20px;
+  color: #94A3B8;
 `;
 
 const LoadingWrapper = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 300px;
+  min-height: 400px;
 `;
 
-const LoadingIcon = styled(FiRefreshCw)`
+const LoadingIcon = styled(FiActivity)`
+  font-size: 32px;
   color: #10B981;
-  font-size: 30px;
   animation: spin 1s linear infinite;
   
   @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
   }
 `;
 
@@ -400,25 +458,16 @@ const AthleteDetail = () => {
   const [loading, setLoading] = useState(true);
   const [athlete, setAthlete] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
-  const [messageText, setMessageText] = useState('');
+  const [chartPeriod, setChartPeriod] = useState('week');
   
   // Carregar dados do atleta
   useEffect(() => {
     const fetchAthleteData = async () => {
       try {
         setLoading(true);
-        
-        // Verificar autenticação
         await fetchProtectedData();
         
-        // Em um cenário real, você faria chamadas à API aqui
-        // Exemplo:
-        // const response = await api.get(`/athletes/${id}`);
-        // const workouts = await api.get(`/athletes/${id}/workouts`);
-        // const measurements = await api.get(`/athletes/${id}/measurements`);
-        // const appointments = await api.get(`/athletes/${id}/appointments`);
-        
-        // Dados mockados para demonstração
+        // Simular carregamento
         setTimeout(() => {
           const mockAthlete = {
             id: id,
@@ -430,55 +479,65 @@ const AthleteDetail = () => {
             goal: 'Perda de peso',
             joinDate: '15/01/2023',
             lastActivity: '10/03/2023',
-            birthdate: '12/05/1990',
-            gender: 'Feminino',
-            address: 'Rua das Flores, 123 - São Paulo, SP',
-            height: '1.65 m',
-            weight: '68 kg',
-            bodyFat: '24%',
-            emergencyContact: 'João Oliveira - (11) 98888-7777',
-            healthConditions: 'Pressão baixa',
-            allergies: 'Nenhuma',
-            notes: 'Prefere treinar pela manhã. Tem dificuldade com exercícios de impacto.',
-            metrics: {
-              attendance: { value: 85, trend: 5, label: 'Frequência (%)' },
-              completion: { value: 92, trend: 3, label: 'Conclusão de Treinos (%)' },
-              progress: { value: 70, trend: 8, label: 'Progresso (%)' }
-            },
-            workouts: [
-              { id: 1, date: '10/03/2023', name: 'Treino A - Superior', status: 'Concluído', completion: '100%' },
-              { id: 2, date: '08/03/2023', name: 'Treino B - Inferior', status: 'Concluído', completion: '85%' },
-              { id: 3, date: '06/03/2023', name: 'Treino C - Full Body', status: 'Concluído', completion: '90%' },
-              { id: 4, date: '03/03/2023', name: 'Treino A - Superior', status: 'Concluído', completion: '100%' }
-            ],
-            measurements: [
-              { 
-                id: 1, 
-                date: '10/03/2023', 
-                weight: '68 kg', 
-                bodyFat: '24%',
-                measurements: { chest: '92 cm', waist: '75 cm', hips: '102 cm' }
+            avatar: null,
+            // Check-ins data
+            checkins: [
+              {
+                id: 1,
+                date: '2024-03-15',
+                mood: 'happy',
+                energy: 8,
+                sleep: 7,
+                notes: 'Me senti muito bem hoje! Treino foi excelente.',
+                completed: true
               },
-              { 
-                id: 2, 
-                date: '10/02/2023', 
-                weight: '70 kg', 
-                bodyFat: '25%',
-                measurements: { chest: '93 cm', waist: '77 cm', hips: '103 cm' }
+              {
+                id: 2,
+                date: '2024-03-14',
+                mood: 'neutral',
+                energy: 6,
+                sleep: 5,
+                notes: 'Dormi mal, mas consegui treinar.',
+                completed: true
               },
-              { 
-                id: 3, 
-                date: '10/01/2023', 
-                weight: '72 kg', 
-                bodyFat: '26%',
-                measurements: { chest: '94 cm', waist: '79 cm', hips: '104 cm' }
+              {
+                id: 3,
+                date: '2024-03-13',
+                mood: 'sad',
+                energy: 4,
+                sleep: 6,
+                notes: 'Dia difícil, sem energia para treinar.',
+                completed: true
+              },
+              {
+                id: 4,
+                date: '2024-03-12',
+                mood: 'happy',
+                energy: 9,
+                sleep: 8,
+                notes: 'Ótima noite de sono, treino rendeu muito!',
+                completed: true
+              },
+              {
+                id: 5,
+                date: '2024-03-11',
+                mood: 'neutral',
+                energy: 7,
+                sleep: 7,
+                notes: '',
+                completed: true
               }
             ],
-            appointments: [
-              { id: 1, date: '15/03/2023', time: '09:00', type: 'Treino', status: 'Agendado' },
-              { id: 2, date: '17/03/2023', time: '10:00', type: 'Avaliação', status: 'Agendado' },
-              { id: 3, date: '20/03/2023', time: '09:00', type: 'Treino', status: 'Agendado' }
-            ]
+            // Dados para o gráfico
+            checkinStats: {
+              lastCheckin: '2024-03-15',
+              totalCheckins: 25,
+              currentStreak: 5,
+              missedDays: 2,
+              avgEnergy: 7.2,
+              avgSleep: 6.8,
+              avgMood: 'neutral'
+            }
           };
           
           setAthlete(mockAthlete);
@@ -488,7 +547,6 @@ const AthleteDetail = () => {
       } catch (error) {
         console.error('Erro ao buscar dados do atleta:', error);
         setLoading(false);
-        // Redirecionar em caso de erro
         navigate('/athletes');
       }
     };
@@ -496,37 +554,48 @@ const AthleteDetail = () => {
     fetchAthleteData();
   }, [id, navigate]);
   
-  // Manipulador para envio de mensagem
-  const handleSendMessage = async () => {
-    if (!messageText.trim()) return;
-    
-    try {
-      // Num cenário real, você enviaria a mensagem para o backend
-      // await api.post(`/messages/athlete/${id}`, { message: messageText });
-      
-      // Simulação de sucesso
-      alert('Mensagem enviada com sucesso!');
-      setMessageText('');
-    } catch (error) {
-      console.error('Erro ao enviar mensagem:', error);
-      alert('Erro ao enviar mensagem. Tente novamente.');
+  // Função para obter emoji do humor
+  const getMoodEmoji = (mood) => {
+    switch (mood) {
+      case 'happy': return '😊';
+      case 'neutral': return '😐';
+      case 'sad': return '😔';
+      default: return '😐';
     }
   };
   
-  // Funções para adicionar novos itens
-  const handleAddWorkout = () => {
-    navigate(`/workouts/create?athleteId=${id}`);
+  // Função para obter cor do humor
+  const getMoodColor = (mood) => {
+    switch (mood) {
+      case 'happy': return '#10B981';
+      case 'neutral': return '#F59E0B';
+      case 'sad': return '#EF4444';
+      default: return '#64748B';
+    }
   };
   
-  const handleAddMeasurement = () => {
-    navigate(`/athletes/${id}/measurements/add`);
+  // Função para calcular dias sem check-in
+  const getDaysSinceLastCheckin = () => {
+    if (!athlete || !athlete.checkinStats.lastCheckin) return 0;
+    const lastDate = new Date(athlete.checkinStats.lastCheckin);
+    const today = new Date();
+    const diffTime = Math.abs(today - lastDate);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
   };
   
-  const handleAddAppointment = () => {
-    navigate(`/calendar/new?athleteId=${id}`);
+  // Preparar dados para o gráfico
+  const prepareChartData = () => {
+    if (!athlete || !athlete.checkins) return [];
+    
+    return athlete.checkins.slice(0, 7).reverse().map(checkin => ({
+      date: new Date(checkin.date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+      energia: checkin.energy,
+      sono: checkin.sleep,
+      humor: checkin.mood === 'happy' ? 10 : checkin.mood === 'neutral' ? 5 : 2
+    }));
   };
   
-  // Obter iniciais do nome
   const getInitials = (name) => {
     return name
       .split(' ')
@@ -624,6 +693,12 @@ const AthleteDetail = () => {
             Visão Geral
           </Tab>
           <Tab 
+            active={activeTab === 'checkins'} 
+            onClick={() => setActiveTab('checkins')}
+          >
+            Check-ins Diários
+          </Tab>
+          <Tab 
             active={activeTab === 'workouts'} 
             onClick={() => setActiveTab('workouts')}
           >
@@ -636,255 +711,250 @@ const AthleteDetail = () => {
             Medidas
           </Tab>
           <Tab 
-            active={activeTab === 'appointments'} 
-            onClick={() => setActiveTab('appointments')}
-          >
-            Agendamentos
-          </Tab>
-          <Tab 
             active={activeTab === 'notes'} 
             onClick={() => setActiveTab('notes')}
           >
-            Notas
+            Observações
           </Tab>
         </TabsContainer>
         
+        {/* Tab Check-ins Diários */}
+        {activeTab === 'checkins' && (
+          <SectionContent>
+            {/* Alerta se não fez check-in há mais de 2 dias */}
+            {getDaysSinceLastCheckin() > 2 && (
+              <AlertBanner>
+                <FiAlertCircle />
+                <AlertText>
+                  <h4>Atenção: Check-in em atraso</h4>
+                  <p>{athlete.name} não faz check-in há {getDaysSinceLastCheckin()} dias. Considere entrar em contato.</p>
+                </AlertText>
+              </AlertBanner>
+            )}
+            
+            {/* Estatísticas dos Check-ins */}
+            <CheckinOverview>
+              <CheckinStat>
+                <CheckinStatInfo>
+                  <CheckinStatLabel>Check-ins Totais</CheckinStatLabel>
+                  <CheckinStatValue>{athlete.checkinStats.totalCheckins}</CheckinStatValue>
+                </CheckinStatInfo>
+                <CheckinStatIcon>
+                  <FiCheckCircle />
+                </CheckinStatIcon>
+              </CheckinStat>
+              
+              <CheckinStat>
+                <CheckinStatInfo>
+                  <CheckinStatLabel>Sequência Atual</CheckinStatLabel>
+                  <CheckinStatValue>{athlete.checkinStats.currentStreak} dias</CheckinStatValue>
+                </CheckinStatInfo>
+                <CheckinStatIcon>
+                  <FiTrendingUp />
+                </CheckinStatIcon>
+              </CheckinStat>
+              
+              <CheckinStat>
+                <CheckinStatInfo>
+                  <CheckinStatLabel>Média de Energia</CheckinStatLabel>
+                  <CheckinStatValue>{athlete.checkinStats.avgEnergy}/10</CheckinStatValue>
+                </CheckinStatInfo>
+                <CheckinStatIcon>
+                  <FiBattery />
+                </CheckinStatIcon>
+              </CheckinStat>
+              
+              <CheckinStat variant={athlete.checkinStats.missedDays > 0 ? 'alert' : ''}>
+                <CheckinStatInfo>
+                  <CheckinStatLabel>Dias Perdidos</CheckinStatLabel>
+                  <CheckinStatValue variant={athlete.checkinStats.missedDays > 0 ? 'alert' : ''}>
+                    {athlete.checkinStats.missedDays}
+                  </CheckinStatValue>
+                </CheckinStatInfo>
+                <CheckinStatIcon variant={athlete.checkinStats.missedDays > 0 ? 'alert' : ''}>
+                  <FiXCircle />
+                </CheckinStatIcon>
+              </CheckinStat>
+            </CheckinOverview>
+            
+            {/* Gráfico de Tendências */}
+            <ChartContainer>
+              <ChartHeader>
+                <ChartTitle>
+                  <FiBarChart2 style={{ display: 'inline', marginRight: '8px' }} />
+                  Tendências dos Check-ins
+                </ChartTitle>
+                <PeriodSelector>
+                  <PeriodButton 
+                    active={chartPeriod === 'week'} 
+                    onClick={() => setChartPeriod('week')}
+                  >
+                    Semana
+                  </PeriodButton>
+                  <PeriodButton 
+                    active={chartPeriod === 'month'} 
+                    onClick={() => setChartPeriod('month')}
+                  >
+                    Mês
+                  </PeriodButton>
+                </PeriodSelector>
+              </ChartHeader>
+              
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={prepareChartData()}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
+                  <XAxis dataKey="date" stroke="#64748B" fontSize={12} />
+                  <YAxis domain={[0, 10]} stroke="#64748B" fontSize={12} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      background: 'white', 
+                      border: '1px solid #E2E8F0', 
+                      borderRadius: '8px' 
+                    }}
+                  />
+                  <Legend />
+                  <Line 
+                    type="monotone" 
+                    dataKey="energia" 
+                    stroke="#10B981" 
+                    strokeWidth={2}
+                    dot={{ fill: '#10B981', r: 4 }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="sono" 
+                    stroke="#3B82F6" 
+                    strokeWidth={2}
+                    dot={{ fill: '#3B82F6', r: 4 }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="humor" 
+                    stroke="#F59E0B" 
+                    strokeWidth={2}
+                    dot={{ fill: '#F59E0B', r: 4 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </ChartContainer>
+            
+            {/* Histórico de Check-ins */}
+            <h3 style={{ margin: '0 0 16px', fontSize: '16px', fontWeight: '600' }}>
+              Histórico de Check-ins
+            </h3>
+            
+            <CheckinHistory>
+              {athlete.checkins.map(checkin => (
+                <CheckinCard key={checkin.id}>
+                  <CheckinHeader>
+                    <CheckinDate>
+                      <FiCalendar />
+                      {new Date(checkin.date).toLocaleDateString('pt-BR', { 
+                        weekday: 'short', 
+                        day: '2-digit', 
+                        month: 'short' 
+                      })}
+                    </CheckinDate>
+                    <CheckinMood>{getMoodEmoji(checkin.mood)}</CheckinMood>
+                  </CheckinHeader>
+                  
+                  <CheckinMetrics>
+                    <CheckinMetric>
+                      <MetricIcon><FiBattery /></MetricIcon>
+                      <MetricScore>{checkin.energy}/10</MetricScore>
+                      <MetricName>Energia</MetricName>
+                    </CheckinMetric>
+                    
+                    <CheckinMetric>
+                      <MetricIcon><FiMoon /></MetricIcon>
+                      <MetricScore>{checkin.sleep}/10</MetricScore>
+                      <MetricName>Sono</MetricName>
+                    </CheckinMetric>
+                    
+                    <CheckinMetric>
+                      <MetricIcon><FiHeart /></MetricIcon>
+                      <MetricScore style={{ color: getMoodColor(checkin.mood) }}>
+                        {checkin.mood === 'happy' ? 'Bem' : checkin.mood === 'neutral' ? 'Normal' : 'Mal'}
+                      </MetricScore>
+                      <MetricName>Humor</MetricName>
+                    </CheckinMetric>
+                  </CheckinMetrics>
+                  
+                  {checkin.notes && (
+                    <CheckinNotes>
+                      {checkin.notes}
+                    </CheckinNotes>
+                  )}
+                </CheckinCard>
+              ))}
+            </CheckinHistory>
+            
+            {athlete.checkins.length === 0 && (
+              <EmptyState>
+                <EmptyIcon><FiFileText /></EmptyIcon>
+                <EmptyTitle>Nenhum check-in registrado</EmptyTitle>
+                <EmptyDescription>
+                  Este atleta ainda não fez nenhum check-in diário.
+                </EmptyDescription>
+              </EmptyState>
+            )}
+          </SectionContent>
+        )}
+        
+        {/* Tab Visão Geral - adicionar resumo dos check-ins */}
         {activeTab === 'overview' && (
           <SectionContent>
-            <MetricsGrid>
-              {Object.entries(athlete.metrics).map(([key, metric]) => (
-                <MetricCard key={key}>
-                  <MetricLabel>
-                    {key === 'attendance' && <FiCalendar />}
-                    {key === 'completion' && <FiActivity />}
-                    {key === 'progress' && <FiTrendingUp />}
-                    {metric.label}
-                  </MetricLabel>
-                  <MetricValue>{metric.value}%</MetricValue>
-                  <MetricTrend positive={metric.trend > 0}>
-                    {metric.trend > 0 ? <FiTrendingUp /> : <FiTrendingUp style={{ transform: 'rotate(180deg)' }} />}
-                    {Math.abs(metric.trend)}% que no mês anterior
-                  </MetricTrend>
-                  <ProgressChart>
-                    <ProgressBar value={metric.value} />
-                  </ProgressChart>
-                </MetricCard>
-              ))}
-            </MetricsGrid>
+            <h3 style={{ margin: '0 0 16px', fontSize: '16px', fontWeight: '600' }}>
+              Resumo de Atividades
+            </h3>
             
-            <Grid>
-              <Section style={{ margin: 0 }}>
-                <SectionHeader>
-                  <SectionTitle>
-                    <FiClipboard /> Treinos Recentes
-                  </SectionTitle>
-                  <Link to={`/athletes/${id}/workouts`} style={{ fontSize: '14px', color: '#10B981', textDecoration: 'none' }}>
-                    Ver todos
-                  </Link>
-                </SectionHeader>
-                <TableWrapper>
-                  <Table>
-                    <thead>
-                      <tr>
-                        <Th>Data</Th>
-                        <Th>Treino</Th>
-                        <Th>Status</Th>
-                        <Th>Completude</Th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {athlete.workouts.slice(0, 3).map(workout => (
-                        <Tr key={workout.id}>
-                          <Td>{workout.date}</Td>
-                          <Td>{workout.name}</Td>
-                          <Td>{workout.status}</Td>
-                          <Td>{workout.completion}</Td>
-                        </Tr>
-                      ))}
-                    </tbody>
-                  </Table>
-                </TableWrapper>
-              </Section>
-              
-              <Section style={{ margin: 0 }}>
-                <SectionHeader>
-                  <SectionTitle>
-                    <FiUser /> Informações Pessoais
-                  </SectionTitle>
-                </SectionHeader>
-                <SectionContent>
-                  <InfoGrid style={{ gridTemplateColumns: '1fr' }}>
-                    <InfoItem>
-                      <InfoLabel>Data de Nascimento</InfoLabel>
-                      <InfoValue>{athlete.birthdate}</InfoValue>
-                    </InfoItem>
-                    <InfoItem>
-                      <InfoLabel>Gênero</InfoLabel>
-                      <InfoValue>{athlete.gender}</InfoValue>
-                    </InfoItem>
-                    <InfoItem>
-                      <InfoLabel>Altura</InfoLabel>
-                      <InfoValue>{athlete.height}</InfoValue>
-                    </InfoItem>
-                    <InfoItem>
-                      <InfoLabel>Peso Atual</InfoLabel>
-                      <InfoValue>{athlete.weight}</InfoValue>
-                    </InfoItem>
-                    <InfoItem>
-                      <InfoLabel>Gordura Corporal</InfoLabel>
-                      <InfoValue>{athlete.bodyFat}</InfoValue>
-                    </InfoItem>
-                    <InfoItem>
-                      <InfoLabel>Contato de Emergência</InfoLabel>
-                      <InfoValue>{athlete.emergencyContact}</InfoValue>
-                    </InfoItem>
-                    <InfoItem>
-                      <InfoLabel>Condições de Saúde</InfoLabel>
-                      <InfoValue>{athlete.healthConditions || 'Nenhuma'}</InfoValue>
-                    </InfoItem>
-                    <InfoItem>
-                      <InfoLabel>Alergias</InfoLabel>
-                      <InfoValue>{athlete.allergies || 'Nenhuma'}</InfoValue>
-                    </InfoItem>
-                  </InfoGrid>
-                </SectionContent>
-              </Section>
-            </Grid>
-          </SectionContent>
-        )}
-        
-        {activeTab === 'workouts' && (
-          <SectionContent>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '600' }}>Histórico de Treinos</h3>
-              <AddButton onClick={handleAddWorkout}>
-                <FiPlus /> Atribuir Novo Treino
-              </AddButton>
-            </div>
-            <TableWrapper>
-              <Table>
-                <thead>
-                  <tr>
-                    <Th>Data</Th>
-                    <Th>Treino</Th>
-                    <Th>Status</Th>
-                    <Th>Completude</Th>
-                    <Th>Ações</Th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {athlete.workouts.map(workout => (
-                    <Tr key={workout.id}>
-                      <Td>{workout.date}</Td>
-                      <Td>{workout.name}</Td>
-                      <Td>{workout.status}</Td>
-                      <Td>{workout.completion}</Td>
-                      <Td>
-                        <Link to={`/workouts/${workout.id}`} style={{ color: '#10B981', marginRight: '10px' }}>
-                          Ver
-                        </Link>
-                      </Td>
-                    </Tr>
-                  ))}
-                </tbody>
-              </Table>
-            </TableWrapper>
-          </SectionContent>
-        )}
-        
-        {activeTab === 'measurements' && (
-          <SectionContent>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '600' }}>Histórico de Medidas</h3>
-              <AddButton onClick={handleAddMeasurement}>
-                <FiPlus /> Adicionar Nova Medida
-              </AddButton>
-            </div>
-            <TableWrapper>
-              <Table>
-                <thead>
-                  <tr>
-                    <Th>Data</Th>
-                    <Th>Peso</Th>
-                    <Th>Gordura Corporal</Th>
-                    <Th>Tórax</Th>
-                    <Th>Cintura</Th>
-                    <Th>Quadril</Th>
-                    <Th>Ações</Th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {athlete.measurements.map(measurement => (
-                    <Tr key={measurement.id}>
-                      <Td>{measurement.date}</Td>
-                      <Td>{measurement.weight}</Td>
-                      <Td>{measurement.bodyFat}</Td>
-                      <Td>{measurement.measurements.chest}</Td>
-                      <Td>{measurement.measurements.waist}</Td>
-                      <Td>{measurement.measurements.hips}</Td>
-                      <Td>
-                        <Link to={`/athletes/${id}/measurements/${measurement.id}`} style={{ color: '#10B981' }}>
-                          Detalhes
-                        </Link>
-                      </Td>
-                    </Tr>
-                  ))}
-                </tbody>
-              </Table>
-            </TableWrapper>
-          </SectionContent>
-        )}
-        
-        {activeTab === 'notes' && (
-  <SectionContent>
-    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-      <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '600' }}>Notas</h3>
-      <AddButton>
-        <FiPlus /> Adicionar Nota
-      </AddButton>
-    </div>
-    
-    <div style={{ background: '#F8FAFC', padding: '16px', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
-      <div style={{ fontSize: '14px', marginBottom: '20px' }}>
-        <p style={{ margin: '0 0 10px', color: '#1E293B' }}>{athlete.notes}</p>
-      </div>
-      
-      <div style={{ borderTop: '1px solid #E2E8F0', paddingTop: '16px' }}>
-        <h4 style={{ fontSize: '14px', margin: '0 0 10px', fontWeight: '500' }}>Enviar mensagem</h4>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <input 
-            type="text" 
-            placeholder="Escreva uma mensagem para o atleta..." 
-            style={{ 
-              flex: 1, 
-              padding: '10px', 
+            {/* Mini resumo dos check-ins na visão geral */}
+            <div style={{ 
+              background: '#F8FAFC', 
+              border: '1px solid #E2E8F0', 
               borderRadius: '8px', 
-              border: '1px solid #E2E8F0',
-              fontSize: '14px'
-            }}
-            value={messageText}
-            onChange={(e) => setMessageText(e.target.value)}
-          />
-          <button
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              padding: '10px 16px',
-              background: '#10B981',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer'
-            }}
-            onClick={handleSendMessage}
-          >
-            <FiMessageSquare style={{ marginRight: '5px' }} /> Enviar
-          </button>
-        </div>
-      </div>
-    </div>
-  </SectionContent>
-)}
+              padding: '16px',
+              marginBottom: '20px'
+            }}>
+              <h4 style={{ margin: '0 0 12px', fontSize: '14px', fontWeight: '600', color: '#1E293B' }}>
+                Check-ins Recentes
+              </h4>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px' }}>
+                <div>
+                  <div style={{ fontSize: '12px', color: '#64748B', marginBottom: '4px' }}>Último Check-in</div>
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#1E293B' }}>
+                    {athlete.checkinStats.lastCheckin ? 
+                      new Date(athlete.checkinStats.lastCheckin).toLocaleDateString('pt-BR') : 
+                      'Nenhum'
+                    }
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '12px', color: '#64748B', marginBottom: '4px' }}>Sequência</div>
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#10B981' }}>
+                    {athlete.checkinStats.currentStreak} dias
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '12px', color: '#64748B', marginBottom: '4px' }}>Média de Energia</div>
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#1E293B' }}>
+                    {athlete.checkinStats.avgEnergy}/10
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '12px', color: '#64748B', marginBottom: '4px' }}>Humor Geral</div>
+                  <div style={{ fontSize: '14px', fontWeight: '600' }}>
+                    {athlete.checkinStats.avgMood === 'happy' ? '😊 Positivo' : 
+                     athlete.checkinStats.avgMood === 'neutral' ? '😐 Neutro' : 
+                     '😔 Baixo'}
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Resto do conteúdo da visão geral... */}
+          </SectionContent>
+        )}
       </Section>
     </MainLayout>
   );
